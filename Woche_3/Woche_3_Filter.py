@@ -43,7 +43,7 @@ class ImageFilteringDemonstration:
         self.master.geometry("400x600")
 
         options = [
-            "Gaussian", "bilateral", "median", "Sobel", "Scharr"
+            "Gaussian", "bilateral", "median", "Sobel", "Scharr", 'Canny'
         ]
 
         clicked = StringVar()
@@ -104,15 +104,23 @@ class ImageFilteringDemonstration:
                 cv2.imshow("Scharr blurred: ", blurred_image)
                 cv2.waitKey(1)
             case 'Canny':
+                # https://docs.opencv.org/3.4/da/d5c/tutorial_canny_detector.html
                 threshold1 = self.widgets['threshold1'].get()
+                src_gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+                img_blur = cv2.blur(src_gray, (3, 3))
+                ratio = 3
+                kernel_size = 3
+                detected_edges = cv2.Canny(img_blur, threshold1, threshold1 * ratio, kernel_size)
 
-                blurred_image = cv2.Canny(src=self.image, threshold1=threshold1, threshold2=threshold2,apertureSize=apertureSize,L2gradient=True)  # threshold1 threshold2, edges, apertureSize, L2Gradient
-                cv2.imshow("Canny blurred: ", blurred_image)
+                mask = detected_edges != 0
+                dst = self.image * (mask[:,:,None].astype(self.image.dtype))
+
+                cv2.imshow("Canny blurred: ", dst)
                 cv2.waitKey(1)
 
     def demonstrate_blur(self):
         if self.widgets:
-            for slider in self.widgets:
+            for slider in self.widgets.values():
                 slider.destroy()
 
         match str(self.filter):
@@ -166,10 +174,8 @@ class ImageFilteringDemonstration:
                 self.widgets['kSize'].pack()
             case 'Canny':
                 # threshold1 threshold2, edges, apertureSize, L2Gradient
-                ratio = 3
-                kernel_size = 3
                 self.widgets['threshold1'] = Scale(self.master, from_=0, to=100, resolution=1, label='threshold1', orient=VERTICAL, command=lambda x: self.apply_blur())
-
+                self.widgets['threshold1'].pack()
 
 demonstration = ImageFilteringDemonstration()
 demonstration.register_callbacks(demonstration.demonstrate_blur)
