@@ -57,8 +57,12 @@ def main():
     # Resize both images to 128x128 to avoid different image size issue
     sigma = sigmaInput.get()
 
-    resized_gray_1 = cv2.resize(gray_file_1, (128, 128))
-    resized_gray_2 = cv2.resize(gray_file_2, (128, 128))
+    if gray == 1:
+        resized_gray_1 = cv2.resize(gray_file_1, (128, 128))
+        resized_gray_2 = cv2.resize(gray_file_2, (128, 128))
+    else:
+        resized_gray_1 = cv2.resize(file_1, (128, 128))
+        resized_gray_2 = cv2.resize(file_2, (128, 128))
 
     original1 = np.fft.fft2(resized_gray_1)  # Get the fourier of image1
     center1 = np.fft.fftshift(original1)  # Apply Centre shifting
@@ -87,6 +91,10 @@ sigmaInput.grid(row=0, column=1)
 
 Button_1 = Button(master=root, height=10, width=20, command=main)
 Button_1.grid(row=0, column=3)
+
+gray = IntVar()
+grayInput = Checkbutton(root, text="gray?", variable=gray)
+grayInput.grid(row=0, sticky=W)
 
 file_1 = filedialog.askopenfilename()
 file_2 = filedialog.askopenfilename()
